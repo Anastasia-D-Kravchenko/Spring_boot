@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Admin Panel</div>
+      <nav class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}" class="sidebar-link active">
+          <span class="sidebar-icon">📊</span> Dashboard
+        </a>
+        <a th:href="@{/admin/users}" class="sidebar-link">
+          <span class="sidebar-icon">👥</span> Users
+        </a>
+        <a th:href="@{/admin/data-adders/new}" class="sidebar-link">
+          <span class="sidebar-icon">➕</span> New Data Adder
+        </a>
+        <a th:href="@{/admin/events}" class="sidebar-link">
+          <span class="sidebar-icon">🗓️</span> All Events
+        </a>
+      </nav>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Quick Access</div>
+      <nav class="sidebar-nav">
+        <a th:href="@{/events}" class="sidebar-link">
+          <span class="sidebar-icon">🌐</span> Public Site
+        </a>
+        <a th:href="@{/h2-console}" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">🗄️</span> Database
+        </a>
+      </nav>
+    </div>
+    <div class="sidebar-section" style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="padding:10px 12px;font-size:.82rem;color:var(--text-muted)">
+        Logged in as<br>
+        <strong style="color:var(--text)" th:text="${currentUser.fullName}">Admin</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="flex-between mb-32 flex-wrap gap-16">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="text-muted mt-8">System overview and management</p>
+      </div>
+      <a th:href="@{/admin/data-adders/new}" class="btn btn-primary">+ New Data Adder</a>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="grid grid-4 mb-32">
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.totalEvents}">0</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.upcomingEvents}">0</div>
+        <div class="stat-label">Upcoming Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.totalUsers}">0</div>
+        <div class="stat-label">Registered Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.totalDataAdders}">0</div>
+        <div class="stat-label">Data Adders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.totalRegistrations}">0</div>
+        <div class="stat-label">Total Registrations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" th:text="${stats.activeEvents}">0</div>
+        <div class="stat-label">Active Events</div>
+      </div>
+    </div>
+
+    <!-- Recent events + category stats -->
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:28px">
+      <div class="card">
+        <div class="card-header flex-between">
+          <h3>Recent Events</h3>
+          <a th:href="@{/admin/events}" class="btn btn-ghost btn-sm">View all</a>
+        </div>
+        <div class="card-body" style="padding-top:0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Fill</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="event : ${recentEvents}">
+                  <td>
+                    <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.title}"
+                       style="color:var(--text);font-weight:500">Title</a>
+                  </td>
+                  <td class="text-muted" style="font-size:.83rem"
+                      th:text="${#temporals.format(event.eventDate,'dd MMM')}">Date</td>
+                  <td>
+                    <span class="badge"
+                          th:text="${event.status.name()}"
+                          th:classappend="${event.status.name() == 'ACTIVE'} ? 'badge-success' : 'badge-warning'">status</span>
+                  </td>
+                  <td style="font-size:.83rem"
+                      th:text="${event.registeredCount + '/' + event.maxParticipants}">0/0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category stats -->
+      <div class="card">
+        <div class="card-header"><h3>Events by Category</h3></div>
+        <div class="card-body" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
+          <div th:each="row : ${categoryStats}"
+               style="display:flex;flex-direction:column;gap:6px">
+            <div class="flex-between" style="font-size:.85rem">
+              <span th:text="${row[0].emoji + ' ' + row[0].displayName}">Cat</span>
+              <span class="text-muted" th:text="${row[1]}">0</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar"
+                   th:style="'width:' + (${row[1] * 100 / stats.totalEvents}) + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>setTimeout(() => document.querySelectorAll('.flash').forEach(f => f.style.opacity='0'), 4000);</script>
+</body>
+</html>

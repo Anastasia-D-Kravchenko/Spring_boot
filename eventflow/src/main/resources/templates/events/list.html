@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Events')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<div class="container">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <h1>All <span style="color:var(--accent)">Events</span></h1>
+        <p class="text-muted mt-8">Find and register for events near you</p>
+      </div>
+      <!-- Search -->
+      <form method="get" th:action="@{/events}" class="flex gap-8">
+        <input class="form-control" name="q" type="search" placeholder="Search events…"
+               th:value="${searchQuery}" style="width:260px"/>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category filter -->
+  <div class="filter-bar">
+    <a th:href="@{/events}" class="filter-btn" th:classappend="${selectedCategory == null and searchQuery == null} ? 'active' : ''">
+      🌐 All
+    </a>
+    <a th:each="cat : ${categories}"
+       th:href="@{/events(category=${cat.name()})}"
+       class="filter-btn"
+       th:classappend="${selectedCategory != null and selectedCategory == cat} ? 'active' : ''"
+       th:text="${cat.emoji + ' ' + cat.displayName}">Category</a>
+  </div>
+
+  <!-- Results -->
+  <div th:if="${events.totalElements == 0}" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3 class="empty-title">No events found</h3>
+    <p class="empty-text" th:if="${searchQuery}">No results for "<span th:text="${searchQuery}"></span>"</p>
+    <p class="empty-text" th:unless="${searchQuery}">No events in this category yet.</p>
+    <a th:href="@{/events}" class="btn btn-secondary">Clear filters</a>
+  </div>
+
+  <div class="grid grid-3" th:unless="${events.totalElements == 0}">
+    <a th:each="event : ${events.content}"
+       th:href="@{/events/{id}(id=${event.id})}"
+       class="card event-card">
+      <div class="event-card-img">
+        <img th:if="${event.imageUrl}" th:src="${event.imageUrl}" th:alt="${event.title}"
+             style="width:100%;height:100%;object-fit:cover;"/>
+        <span th:unless="${event.imageUrl}" th:text="${event.category.emoji}" style="z-index:1">✨</span>
+      </div>
+      <div class="event-card-body">
+        <span class="event-tag" th:classappend="'event-tag--' + ${event.category.name().toLowerCase()}"
+              th:text="${event.category.emoji + ' ' + event.category.displayName}">Tag</span>
+        <h3 class="event-title" th:text="${event.title}">Title</h3>
+        <p class="text-muted" style="font-size:.83rem;margin:6px 0 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden"
+           th:text="${event.description}">Desc</p>
+        <div class="event-meta">
+          <div class="event-meta-row">📅 <span th:text="${#temporals.format(event.eventDate,'EEEE, dd MMM yyyy')}">Date</span></div>
+          <div class="event-meta-row">🕐 <span th:text="${#temporals.format(event.eventTime,'HH:mm')}">Time</span></div>
+          <div class="event-meta-row">📍 <span th:text="${event.location}">Location</span></div>
+        </div>
+      </div>
+      <div class="event-card-footer">
+        <div class="flex gap-8 flex-wrap">
+          <span th:if="${event.full}" class="badge badge-danger">Full</span>
+          <span th:unless="${event.full}" class="text-muted" style="font-size:.8rem"
+                th:text="${event.availableSpots + '/' + event.maxParticipants + ' spots'}">spots</span>
+        </div>
+        <span th:if="${event.price > 0}" style="color:var(--accent);font-weight:700"
+              th:text="'€' + ${#numbers.formatDecimal(event.price,1,2)}">€0</span>
+        <span th:unless="${event.price > 0}" class="badge badge-success">Free</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" th:if="${events.totalPages > 1}">
+    <a th:if="${events.hasPrevious()}"
+       th:href="@{/events(page=${currentPage - 1}, category=${selectedCategory?.name()}, q=${searchQuery})}"
+       class="page-btn">← Prev</a>
+    <th:block th:each="i : ${#numbers.sequence(0, events.totalPages - 1)}">
+      <a th:href="@{/events(page=${i}, category=${selectedCategory?.name()}, q=${searchQuery})}"
+         class="page-btn" th:classappend="${i == currentPage} ? 'active' : ''"
+         th:text="${i + 1}">1</a>
+    </th:block>
+    <a th:if="${events.hasNext()}"
+       th:href="@{/events(page=${currentPage + 1}, category=${selectedCategory?.name()}, q=${searchQuery})}"
+       class="page-btn">Next →</a>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script>setTimeout(() => document.querySelectorAll('.flash').forEach(f => f.style.opacity='0'), 4000);</script>
+</body>
+</html>

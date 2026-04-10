@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Log In')}"></head>
+<body style="background:var(--bg)">
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="flex-center" style="min-height:calc(100vh - 64px);padding:40px 24px">
+  <div style="width:100%;max-width:420px">
+
+    <!-- Brand -->
+    <div class="text-center mb-32">
+      <div style="font-size:2.5rem;margin-bottom:12px">⚡</div>
+      <h1 style="font-size:1.8rem">Welcome back</h1>
+      <p class="text-muted mt-8">Sign in to your EventFlow account</p>
+    </div>
+
+    <!-- Flash -->
+    <div th:if="${successMessage}" class="flash flash--success mb-24" style="position:static">
+      ✅ <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${loginError}" class="flash flash--error mb-24" style="position:static">
+      ❌ <span th:text="${loginError}"></span>
+    </div>
+    <div th:if="${logoutMessage}" class="flash flash--success mb-24" style="position:static">
+      ✅ <span th:text="${logoutMessage}"></span>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/auth/login}" method="post">
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input id="email" name="username" type="email" class="form-control"
+                   placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input id="password" name="password" type="password" class="form-control"
+                   placeholder="••••••••" required autocomplete="current-password"/>
+          </div>
+
+          <div class="flex-between mb-24" style="font-size:.85rem">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-muted)">
+              <input type="checkbox" name="remember-me" style="accent-color:var(--accent)"/> Remember me
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In →</button>
+        </form>
+
+        <hr class="divider"/>
+
+        <p class="text-center text-muted" style="font-size:.88rem">
+          Don't have an account? <a th:href="@{/auth/register}">Create one free</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Demo credentials -->
+    <div class="card mt-16" style="border-color:rgba(200,241,53,.2);background:rgba(200,241,53,.04)">
+      <div class="card-body" style="font-size:.82rem">
+        <p style="color:var(--accent);font-weight:700;margin-bottom:10px">🔑 Demo credentials</p>
+        <div style="display:flex;flex-direction:column;gap:6px;color:var(--text-muted)">
+          <div><strong style="color:var(--text)">Admin:</strong> admin@eventflow.com / Admin@1234</div>
+          <div><strong style="color:var(--text)">Manager:</strong> manager@eventflow.com / Manager@1234</div>
+          <div><strong style="color:var(--text)">User:</strong> user@eventflow.com / User@1234</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
